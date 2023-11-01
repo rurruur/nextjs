@@ -1,0 +1,26 @@
+name: deploy to lightsail
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-lates
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: test
+        run: scp -i ${{ secretes.LIGHTSAIL_SSH_KEY }} -r nextjs bitnami@"${{ secrets.LIGHTSAIL_IP }}:/home/bitnami/workspace"
+
+      - name: Update Nginx Config
+        run: |
+          ssh -i ${{ secretes.LIGHTSAIL_SSH_KEY }} bitnami@${{ secrets.LIGHTSAIL_IP }} <<EOF
+            cd /home/bitnami/workspace/nextjs
+            npm ci && npm run build
+            pm2 reload nextjs
+          EOF
+        shell: bash
