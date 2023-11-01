@@ -37,6 +37,6 @@ jobs:
           script: |
             cd /home/bitnami/workspace
             tar xvf nextjs.tar.gz -U -C nextjs
+            rm nextjs.tar.gz
             cd nextjs
             pm2 reload nextjs
-            rm nextjs.tar.gz
