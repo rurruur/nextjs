@@ -18,14 +18,24 @@ jobs:
           npm ci && npm run build
           touch nextjs.tar.gz
           tar zcvf nextjs.tar.gz --exclude=nextjs.tar.gz --exclude=.git .
-          scp -i "${{ secrets.LIGHTSAIL_SSH_KEY }}" nextjs.tar.gz bitnami@"${{ secrets.LIGHTSAIL_IP }}:/home/bitnami/workspace"
+
+      - name: Deploy use SCP
+        uses: appleboy/scp-action@master
+        with:
+          username: bitnami
+          host: ${{ secrets.LIGHTSAIL_IP }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: "./nextjs.tar.gz"
+          target: "/home/bitnami/workspace"
 
       - name: Reload pm2
-        run: |
-          ssh -i "${{ secrets.LIGHTSAIL_SSH_KEY }}" bitnami@${{ secrets.LIGHTSAIL_IP }} <<EOF
+        uses: appleboy/ssh-action@master
+        with:
+          username: bitnami
+          host: ${{ secrets.LIGHTSAIL_IP }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
             cd /home/bitnami/workspace
             tar xvf nextjs.tar.gz -U -C nextjs
             pm2 restart npm --name "nextjs" -- start
             rm nextjs.tar.gz
-          EOF
-        shell: bash
