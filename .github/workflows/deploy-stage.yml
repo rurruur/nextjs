@@ -16,7 +16,7 @@ jobs:
       - name: Build and Compress
         run: |
           npm ci && npm run build
-          tar zcvf nextjs.tar.gz --exclud=.git .
+          tar zcvf nextjs.tar.gz --exclude=.git .
           scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} nextjs.tar.gz bitnami@"${{ secrets.LIGHTSAIL_IP }}:/home/bitnami/workspace"
 
       - name: Reload pm2
