@@ -13,14 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: test
-        run: scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} -r nextjs bitnami@"${{ secrets.LIGHTSAIL_IP }}:/home/bitnami/workspace"
+      - name: Build and Compress
+        run: |
+          npm ci && npm run build
+          tar zcvf nextjs.tar.gz --exclud=.git .
+          scp -i ${{ secrets.LIGHTSAIL_SSH_KEY }} nextjs.tar.gz bitnami@"${{ secrets.LIGHTSAIL_IP }}:/home/bitnami/workspace"
 
-      - name: Update Nginx Config
+      - name: Reload pm2
         run: |
           ssh -i ${{ secrets.LIGHTSAIL_SSH_KEY }} bitnami@${{ secrets.LIGHTSAIL_IP }} <<EOF
-            cd /home/bitnami/workspace/nextjs
-            npm ci && npm run build
-            pm2 reload nextjs
+            cd /home/bitnami/workspace
+            tar xvf nextjs.tar.gz -U -C nextjs
+            pm2 restart npm --name "nextjs" -- start
+            rm nextjs.tar.gz
           EOF
         shell: bash
