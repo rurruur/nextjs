@@ -16,7 +16,7 @@ jobs:
       - name: Get Runner's IP
         id: runner_ip
         run: |
-          echo "Runner's IP Address: $(curl -s https://api.github.com/meta | jq -r '.actions')"
+          echo "::set-output name=runner_ip::$(curl -s https://api.github.com/meta | jq -r '.actions')"
 
       - name: Print Runner's IP
         run: |
