@@ -12,13 +12,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+        
       - name: Get Runner's IP
         id: runner_ip
         run: |
-          echo "Runner's IP Address: $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/actions/runners/self-hosted | jq -r .ip_address)"
-          echo "::set-output name=runner_ip::$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/actions/runners/self-hosted | jq -r .ip_address)"
+          echo "Runner's IP Address: $(curl -s https://api.github.com/meta | jq -r '.actions')"
 
+      - name: Print Runner's IP
+        run: |
+          echo "GitHub Actions runner's IP address: ${{ steps.runner_ip.outputs.runner_ip }}"
+      
       - name: Build and Compress
         run: |
           npm ci && npm run build
