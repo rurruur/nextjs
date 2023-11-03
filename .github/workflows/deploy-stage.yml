@@ -15,13 +15,8 @@ jobs:
         
       - name: Get Runner's IP
         id: runner_ip
-        run: |
-          echo "::set-output name=runner_ip::$(curl -s https://api.github.com/meta | jq -r '.actions')"
+        run: ifconfig
 
-      - name: Print Runner's IP
-        run: |
-          echo "GitHub Actions runner's IP address: ${{ steps.runner_ip.outputs.runner_ip }}"
-      
       - name: Build and Compress
         run: |
           npm ci && npm run build
