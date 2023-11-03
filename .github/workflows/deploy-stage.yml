@@ -23,6 +23,22 @@ jobs:
           touch nextjs.tar.gz
           tar zcvf nextjs.tar.gz --exclude=nextjs.tar.gz --exclude=.git .
 
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: get runner ip addresses
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: whitelist runner ip address
+        run: |
+          echo "${{ steps.ip.outputs.ipv4 }}"
+          aws lightsail open-instance-public-ports --instance-name Node-js-1 --port-infos fromPort=22,toPort=22,protocol=TCP,cidrs=${{ steps.ip.outputs.ipv4 }}
+
       - name: Deploy use SCP
         uses: appleboy/scp-action@master
         with:
@@ -44,3 +60,7 @@ jobs:
             rm nextjs.tar.gz
             cd nextjs
             pm2 reload nextjs
+
+      - name: Revoke runner ip address
+        run: |
+          aws lightsail close-instance-public-ports --instance-name Node-js-1 --port-infos fromPort=22,toPort=22,protocol=TCP,cidrs=${{ steps.ip.outputs.ipv4 }}
